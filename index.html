@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Aergo Smart Contract Editor</title>
+<style type="text/css" media="screen">
+
+html, body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: lightgray;
+  height: 100%;
+}
+
+.navbar {
+  overflow: hidden;
+}
+
+.logo {
+  margin: 10px 20px;
+}
+
+#editor {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+#deploy {
+  position: absolute;
+  right: 20px;
+  margin-top: 10px;
+  font-size: large;
+}
+
+.btn {
+  border: none; /* Remove borders */
+  color: white; /* Add a text color */
+  padding: 14px 28px; /* Add some padding */
+  cursor: pointer; /* Add a pointer cursor on mouse-over */
+}
+
+.aergo {background-color: #ef077d;} /* Pink */
+.aergo:hover {background-color: #cc1873;}
+
+.success {background-color: #4CAF50;} /* Green */
+.success:hover {background-color: #46a049;}
+
+.info {background-color: #2196F3;} /* Blue */
+.info:hover {background: #0b7dda;}
+
+.warning {background-color: #ff9800;} /* Orange */
+.warning:hover {background: #e68a00;}
+
+.danger {background-color: #f44336;} /* Red */
+.danger:hover {background: #da190b;}
+
+.default {background-color: #e7e7e7; color: black;} /* Gray */
+.default:hover {background: #ddd;}
+
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<div class="navbar">
+<img class="logo" src="https://testnet.aergoscan.io/b8ad10fbfc4ce11c608606969a920292.svg"/>
+<button onclick="deploy()" class="btn aergo" id="deploy">Deploy</button>
+</div>
+
+<div id="editor">function test()
+  return 'Hello World!'
+end
+
+abi.register(test)</div>
+
+<script>
+
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/tomorrow_night_bright");
+editor.session.setMode("ace/mode/lua");
+document.getElementById('editor').style.fontSize='18px';
+
+function aergoConnectCall(action, responseType, data) {
+  return new Promise((resolve, reject) => {
+    window.addEventListener(responseType, function(event) {
+      if ('error' in event.detail) {
+        reject(event.detail.error);
+      } else {
+        resolve(event.detail);
+      }
+    }, { once: true });
+    window.postMessage({
+      type: 'AERGO_REQUEST',
+      action: action,
+      data: data,
+    }, '*');
+  });
+}
+
+async function getActiveAccount() {
+  const result = await aergoConnectCall('ACTIVE_ACCOUNT', 'AERGO_ACTIVE_ACCOUNT', {});
+  return result.account.address;
+}
+
+async function startTxSendRequest(txdata) {
+  const result = await aergoConnectCall('SEND_TX', 'AERGO_SEND_TX_RESULT', txdata);
+  console.log('AERGO_SEND_TX_RESULT', result);
+//  document.getElementById('tx_hash').innerHTML = result.hash;
+  alert(result.hash);
+}
+
+async function deploy(){
+
+  var content = editor.getValue();
+  //alert(content)
+
+  var account_address = await getActiveAccount();
+  alert(account_address)
+
+  $.ajax({
+    type: 'POST',
+    url: 'http://192.168.1.47:3001/compile',
+    crossDomain: true,
+    data: content,
+    dataType: 'text',
+    success: function(responseData, textStatus, jqXHR) {
+        var value = responseData;
+alert(value);
+        if (value.substring(0,8) != 'result: '){
+          alert('error compiling the contract');
+          return;
+        }
+        var txdata = '{"from": "' + account_address + '", "payload": "' + value.substring(8) + '"}';
+        alert(txdata);
+        startTxSendRequest(txdata);
+    },
+    error: function (responseData, textStatus, errorThrown) {
+        alert('POST failed.' + responseData + textStatus + errorThrown);
+    }
+  });
+
+
+}
+</script>
+</body>
+</html>
