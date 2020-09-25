@@ -1,8 +1,7 @@
+var $ = require('jquery');
 var herajs = require('@herajs/client');
 //const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
-
-var $ = require('jquery');
-
+var chainId = '';
 
 function aergoConnectCall(action, responseType, data) {
   return new Promise((resolve, reject) => {
@@ -23,15 +22,16 @@ function aergoConnectCall(action, responseType, data) {
 
 async function getActiveAccount() {
   const result = await aergoConnectCall('ACTIVE_ACCOUNT', 'AERGO_ACTIVE_ACCOUNT', {});
+  chainId = result.account.chainId;
   return result.account.address;
 }
 
 async function startTxSendRequest(txdata) {
   const result = await aergoConnectCall('SEND_TX', 'AERGO_SEND_TX_RESULT', txdata);
   console.log('AERGO_SEND_TX_RESULT', result);
-  alert(result.hash);
-  // TODO: retrieve the txn receipt and redirect to the aergoscan page.
-  //       it must know which network is selected on Aergo Connect
+  var site = chainId.replace('aergo','aergoscan');
+  alert(site + '/transaction/' + result.hash);
+  // TODO: wait for the txn receipt and redirect to the aergoscan page
 }
 
 
