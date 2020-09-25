@@ -77,7 +77,7 @@ async function process_deploy(contract_address){
           return;
         }
         var txdata = {
-          type: 6,
+          type: (contract_address == null) ? 6 : 2,
           from: account_address,
           to: contract_address,
           amount: 0,
@@ -97,9 +97,11 @@ function deploy(){
 }
 
 function redeploy() {
-  alert('TODO: redeploy');
-  // TODO: get the contract address from the user
-  // process_deploy(contract_address);
+  var address = prompt("Contract address for redeploy:", "");
+  if (address == null || address == "") {
+    return;
+  }
+  process_deploy(address);
 }
 
 document.getElementById("deploy").onclick = deploy;

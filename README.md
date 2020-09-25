@@ -25,6 +25,7 @@ Copy these files to the web server:
 
 ## TODO
 
-* Ask for contract address on redeploy
 * Wait for transaction receipt and get the returned contract address
 * Display the contract address to the user, with a link to aergoscan page
+* Use a good-looking dialog when asking for contract address on redeploy
+* If the contract has deploy arguments, display a dialog to get them
