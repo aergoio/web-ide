@@ -23,7 +23,7 @@ html, body {
   position: relative;
   margin: 0;
   padding: 0;
-  min-height: calc(100% - 69px); /* subtract the navbar height */
+  min-height: calc(100vh - 69px); /* subtract the navbar height */
 }
 
 #buttons {
@@ -98,6 +98,11 @@ html, body {
 
 .default {background-color: #e7e7e7; color: black;} /* Gray */
 .default:hover {background: #ddd;}
+
+.swal2-file:focus, .swal2-input:focus, .swal2-textarea:focus {
+    border-color: #e5007d !important;
+    box-shadow: 0 0 3px #f5c2de !important;
+}
 
 </style>
 

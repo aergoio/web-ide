@@ -1,4 +1,5 @@
 var $ = require('jquery');
+var Swal = require('sweetalert2');
 var herajs = require('@herajs/client');
 //const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 var chainId = '';
@@ -29,9 +30,35 @@ async function getActiveAccount() {
 async function startTxSendRequest(txdata) {
   const result = await aergoConnectCall('SEND_TX', 'AERGO_SEND_TX_RESULT', txdata);
   console.log('AERGO_SEND_TX_RESULT', result);
+
+  // TODO: wait for the txn receipt
+
   var site = chainId.replace('aergo','aergoscan');
-  alert(site + '/transaction/' + result.hash);
-  // TODO: wait for the txn receipt and redirect to the aergoscan page
+  var url = 'https://' + site + '/transaction/' + result.hash;
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Congratulations!',
+    html: '<br>Your smart contract was deployed!<br>&nbsp;',
+    confirmButtonText: 'View on Aergoscan',
+    cancelButtonText: 'Close',
+    showCancelButton: true,
+    width: 600,
+    padding: '3em',
+    confirmButtonColor: '#e5007d',
+    background: '#fff',
+    backdrop: `
+      rgba(0,0,123,0.4)
+      url("nyan-cat.gif")
+      left top
+      no-repeat
+    `,
+    preConfirm: function() {
+      var win = window.open(url, '_blank');
+      win.focus();
+    }
+  })
+
 }
 
 
@@ -97,11 +124,22 @@ function deploy(){
 }
 
 function redeploy() {
-  var address = prompt("Contract address for redeploy:", "");
-  if (address == null || address == "") {
-    return;
-  }
-  process_deploy(address);
+
+  Swal.fire({
+    title: 'Redeploy',
+    html: '<br>Address of existing contract:',
+    input: 'text',
+    inputAttributes: {
+      autocapitalize: 'off'
+    },
+    confirmButtonColor: '#e5007d',
+    showCancelButton: true
+  }).then((result) => {
+    if (result.isConfirmed && result.value!='') {
+      process_deploy(result.value);
+    }
+  })
+
 }
 
 document.getElementById("deploy").onclick = deploy;

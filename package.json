@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@herajs/client": "^0.21.0",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "sweetalert2": "^10.3.3"
   }
 }
