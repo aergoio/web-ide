@@ -1,8 +1,3 @@
-var editor = ace.edit("editor");
-editor.setTheme("ace/theme/tomorrow_night_bright");
-editor.session.setMode("ace/mode/lua");
-document.getElementById('editor').style.fontSize='18px';
-
 var herajs = require('@herajs/client');
 //const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 

@@ -131,7 +131,10 @@ end
 abi.register(test)</div>
 
 <script>
-
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/tomorrow_night_bright");
+editor.session.setMode("ace/mode/lua");
+document.getElementById('editor').style.fontSize='18px';
 </script>
 
 <script src="bundle.js" type="text/javascript" charset="utf-8"></script>
