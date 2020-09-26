@@ -100,7 +100,11 @@ async function process_deploy(contract_address){
     success: function(responseData, textStatus, jqXHR) {
         var value = responseData;
         if (value.substring(0,8) != 'result: '){
-          alert('error compiling the contract');
+          Swal.fire({
+            icon: 'error',
+            title: 'Compilation failed!',
+            text: value
+          })
           return;
         }
         var txdata = {
