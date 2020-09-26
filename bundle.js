@@ -35,6 +35,7 @@ async function startTxSendRequest(txdata) {
   // TODO: wait for the txn receipt
 
   var site = chainId.replace('aergo','aergoscan');
+  if (site == 'aergoscan.io') site = 'mainnet.aergoscan.io';
   var url = 'https://' + site + '/transaction/' + result.hash;
 
   Swal.fire({
