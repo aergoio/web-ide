@@ -85,11 +85,9 @@ function convertPayload(encoded) {
 }
 
 
-async function process_deploy(contract_address){
+function process_deploy(contract_address){
 
   var content = editor.getValue();
-
-  var account_address = await getActiveAccount();
 
   $.ajax({
     type: 'POST',
@@ -97,7 +95,7 @@ async function process_deploy(contract_address){
     crossDomain: true,
     data: content,
     dataType: 'text',
-    success: function(responseData, textStatus, jqXHR) {
+    success: async function(responseData, textStatus, jqXHR) {
         var value = responseData;
         if (value.substring(0,8) != 'result: '){
           Swal.fire({
@@ -107,6 +105,7 @@ async function process_deploy(contract_address){
           })
           return;
         }
+        var account_address = await getActiveAccount();
         var txdata = {
           type: (contract_address == null) ? 6 : 2,
           from: account_address,
