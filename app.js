@@ -117,7 +117,11 @@ function process_deploy(contract_address){
         startTxSendRequest(txdata);
     },
     error: function (responseData, textStatus, errorThrown) {
-        alert('POST failed.' + responseData + textStatus + errorThrown);
+        Swal.fire({
+          icon: 'error',
+          title: 'Compilation failed!',
+          text: 'Failed to contact the compiler webservice: ' + textStatus
+        })
     }
   });
 
