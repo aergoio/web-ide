@@ -61,6 +61,7 @@ html, body {
   min-width: 160px;
   z-index: 1;
   right: 10px;
+  border-radius: 5px;
 }
 
 .dropdown-content a {
@@ -68,6 +69,14 @@ html, body {
   padding: 12px 16px;
   text-decoration: none;
   display: block;
+  border-radius: 5px;
+}
+
+.dropdown-content .divider {
+  height: 1px;
+  margin: 7px 0;
+  overflow: hidden;
+  background-color: #e5e5e5;
 }
 
 .dropdown-content a:hover {background-color: #ddd}
@@ -123,6 +132,9 @@ html, body {
   </button>
   <div class="dropdown-content">
     <a href="#" id="redeploy">Redeploy</a>
+    <div class="divider"></div>
+    <a href="#" id="fileopen">Open</a>
+    <a href="#" id="filesave">Save</a>
   </div>
 </div>
 </div>

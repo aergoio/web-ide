@@ -151,8 +151,41 @@ function redeploy() {
 
 }
 
+
+function fileopen() {
+
+  $('<input type="file" accept=".lua">').on('change', function() {
+    console.log(this.files);
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var contents = e.target.result;
+      editor.setValue(contents,true);
+    };
+    reader.readAsText(file);
+  }).click();
+
+}
+
+function filesave() {
+  var content = editor.getValue();
+  var pom = document.createElement('a');
+  pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+  pom.setAttribute('download', 'smart-contract.lua');
+  if (document.createEvent) {
+    var event = document.createEvent('MouseEvents');
+    event.initEvent('click', true, true);
+    pom.dispatchEvent(event);
+  } else {
+    pom.click();
+  }
+}
+
 document.getElementById("deploy").onclick = deploy;
 document.getElementById("redeploy").onclick = redeploy;
+document.getElementById("fileopen").onclick = fileopen;
+document.getElementById("filesave").onclick = filesave;
 
 },{"@herajs/client":2,"jquery":6,"sweetalert2":7}],2:[function(require,module,exports){
 (function (global,Buffer){
