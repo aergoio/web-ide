@@ -181,6 +181,19 @@ function filesave() {
   }
 }
 
+document.body.onload = function() {
+
+  var content = localStorage.getItem('code')
+  if (content) {
+    editor.setValue(content,true);
+  }
+
+  setInterval(function(){
+    localStorage.setItem('code', editor.getValue())
+  }, 60000)
+
+}
+
 document.getElementById("deploy").onclick = deploy;
 document.getElementById("redeploy").onclick = redeploy;
 document.getElementById("fileopen").onclick = fileopen;
