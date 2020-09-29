@@ -155,7 +155,6 @@ function redeploy() {
 function fileopen() {
 
   $('<input type="file" accept=".lua">').on('change', function() {
-    console.log(this.files);
     var file = this.files[0];
     if (!file) return;
     var reader = new FileReader();
