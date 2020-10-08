@@ -5,9 +5,24 @@ var herajs = require('@herajs/client');
 //const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 var chainId = '';
 
+document.getElementById("install-extension").onclick = function() {
+  var win = window.open('https://chrome.google.com/webstore/detail/aergo-connect/iopigoikekfcpcapjlkcdlokheickhpc', '_blank');
+  win.focus();
+}
+
+function hide_box() {
+  document.getElementById("no-extension").style.display = "none";
+}
+
 function aergoConnectCall(action, responseType, data) {
+
+  setTimeout(function() {
+    document.getElementById("no-extension").style.display = "block";
+  }, 3000);
+
   return new Promise((resolve, reject) => {
     window.addEventListener(responseType, function(event) {
+      hide_box();
       if ('error' in event.detail) {
         reject(event.detail.error);
       } else {
@@ -20,6 +35,7 @@ function aergoConnectCall(action, responseType, data) {
       data: data,
     }, '*');
   });
+
 }
 
 async function getActiveAccount() {
