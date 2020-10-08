@@ -221,6 +221,11 @@ document.getElementById("replace").onclick = function() {
   hide_menu();
   return false;
 }
+document.getElementById("settings").onclick = function() {
+  editor.execCommand("showSettingsMenu");
+  hide_menu();
+  return false;
+}
 
 },{"@herajs/client":2,"jquery":6,"sweetalert2":7}],2:[function(require,module,exports){
 (function (global,Buffer){

@@ -220,3 +220,8 @@ document.getElementById("replace").onclick = function() {
   hide_menu();
   return false;
 }
+document.getElementById("settings").onclick = function() {
+  editor.execCommand("showSettingsMenu");
+  hide_menu();
+  return false;
+}
