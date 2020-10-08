@@ -7,6 +7,7 @@ var chainId = '';
 document.getElementById("install-extension").onclick = function() {
   var win = window.open('https://chrome.google.com/webstore/detail/aergo-connect/iopigoikekfcpcapjlkcdlokheickhpc', '_blank');
   win.focus();
+  hide_box();
 }
 
 function hide_box() {
