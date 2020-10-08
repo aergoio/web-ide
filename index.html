@@ -162,7 +162,8 @@ html, body {
   return 'Hello World!'
 end
 
-abi.register(test)</div>
+abi.register(test)
+</div>
 
 <div id="no-extension" class="no-extension swal2-container swal2-center">
 <div class="swal2-content swal2-html-container" style="display: block;"><br>Nothing happened?</div>
@@ -174,6 +175,7 @@ var editor = ace.edit("editor");
 editor.setTheme("ace/theme/tomorrow_night_bright");
 editor.session.setMode("ace/mode/lua");
 document.getElementById('editor').style.fontSize='18px';
+editor.session.setOptions({ tabSize: 2, useSoftTabs: true });
 </script>
 
 <script src="bundle.js" type="text/javascript" charset="utf-8"></script>
