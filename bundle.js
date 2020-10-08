@@ -130,6 +130,7 @@ function process_deploy(contract_address){
 
 function deploy(){
   process_deploy(null);
+  return false;
 }
 
 function redeploy() {
@@ -149,6 +150,7 @@ function redeploy() {
     }
   })
 
+  return false;
 }
 
 
@@ -165,6 +167,7 @@ function fileopen() {
     reader.readAsText(file);
   }).click();
 
+  return false;
 }
 
 function filesave() {
@@ -179,6 +182,7 @@ function filesave() {
   } else {
     pom.click();
   }
+  return false;
 }
 
 document.body.onload = function() {
@@ -198,6 +202,25 @@ document.getElementById("deploy").onclick = deploy;
 document.getElementById("redeploy").onclick = redeploy;
 document.getElementById("fileopen").onclick = fileopen;
 document.getElementById("filesave").onclick = filesave;
+
+function hide_menu() {
+  var menu = document.getElementById("menu")
+  menu.style.display = "none";
+  setTimeout(function() {
+    menu.style.removeProperty("display");
+  }, 30);
+}
+
+document.getElementById("find").onclick = function() {
+  editor.execCommand("find");
+  hide_menu();
+  return false;
+}
+document.getElementById("replace").onclick = function() {
+  editor.execCommand("replace");
+  hide_menu();
+  return false;
+}
 
 },{"@herajs/client":2,"jquery":6,"sweetalert2":7}],2:[function(require,module,exports){
 (function (global,Buffer){
