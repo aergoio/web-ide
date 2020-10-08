@@ -107,6 +107,13 @@ html, body {
 .default {background-color: #e7e7e7; color: black;} /* Gray */
 .default:hover {background: #ddd;}
 
+.ace_dark.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {
+  background-color: #673a51 !important;
+}
+.ace_dark.ace_editor.ace_autocomplete .ace_completion-highlight {
+  color: #e5007d !important;
+}
+
 .swal2-file:focus, .swal2-input:focus, .swal2-textarea:focus {
     border-color: #e5007d !important;
     box-shadow: 0 0 3px #f5c2de !important;
@@ -127,6 +134,7 @@ html, body {
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -174,9 +182,16 @@ abi.register(test)
 var editor = ace.edit("editor");
 editor.setTheme("ace/theme/tomorrow_night_bright");
 editor.session.setMode("ace/mode/lua");
-document.getElementById('editor').style.fontSize='18px';
+editor.setFontSize(18);
 editor.session.setOptions({ tabSize: 2, useSoftTabs: true });
 editor.setShowPrintMargin(false);
+
+ace.require("ace/ext/language_tools");
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableSnippets: false,
+    enableLiveAutocompletion: true
+});
 </script>
 
 <script src="bundle.js" type="text/javascript" charset="utf-8"></script>
