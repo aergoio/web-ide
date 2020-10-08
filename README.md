@@ -28,5 +28,4 @@ Copy these files to the web server:
 
 * Wait for transaction receipt and get the returned contract address
 * If the contract has deploy arguments, display a dialog to get them
-* Detect whether Aergo Connect is installed and display link for installation
 * Syntax highlight for aergo keywords
