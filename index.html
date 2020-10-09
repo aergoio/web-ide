@@ -186,12 +186,82 @@ editor.setFontSize(18);
 editor.session.setOptions({ tabSize: 2, useSoftTabs: true });
 editor.setShowPrintMargin(false);
 
-ace.require("ace/ext/language_tools");
+// autocomplete
+
+const modules = {
+  // lua modules
+  string: ["byte", "char", "dump", "find", "format", "gmatch", "gsub", "len", "lower", "match", "rep", "reverse", "sub", "upper"],
+  math: ["abs", "ceil", "floor", "pow", "max", "min"],
+  table: ["concat", "insert", "maxn", "remove", "sort"],
+  bit: ["tobit", "tohex", "bnot", "band", "bor", "bxor", "lshift", "rshift", "arshift", "rol", "ror", "bswap"],
+  // aergo modules
+  state: ["var", "value", "map", "array"],
+  system: ["getSender", "getBlockheight", "getTxhash", "getTimestamp", "getContractID", "setItem", "getItem", "getAmount", "getCreator", "getOrigin", "getPrevBlockHash", "print", "isContract"],
+  contract: ["send", "deploy", "call", "delegatecall", "pcall", "balance", "event", "stake"],
+  db: ["exec", "query", "prepare"],
+  crypto: ["sha256","ecverify"],
+  json: ["encode","decode"],
+  bignum: ["number", "isneg", "iszero", "tonumber", "tostring", "neg", "sqrt", "compare", "add", "sub", "mul", "mod", "div", "pow", "divmod", "powmod", "isbignum", "tobyte", "frombyte"],
+  abi: ["register", "register_view", "payable"]
+}
+
+function lastWord(words) {
+  var n = words.split(/[\s,=\.]+/);
+  return n[n.length - 2];
+}
+
+var myCompleter = {
+  getCompletions: function(editor, session, pos, prefix, callback) {
+    var line = session.getLine(pos.row)
+    var lineStart = line.slice(0, pos.column - prefix.length)
+    var myList = []
+
+    if (lineStart.slice(-1) == '.') {
+      var name = lastWord(lineStart);
+      if (modules[name]) {
+        myList = modules[name]
+      }
+    } else {
+      myList = Object.keys(modules)
+    }
+
+    callback(null, myList.map(entry => {
+      return {
+        value: entry,
+        score: 1000
+      }
+    }))
+
+  }
+}
+
+var langTools = ace.require("ace/ext/language_tools")
+langTools.addCompleter(myCompleter);
+
 editor.setOptions({
     enableBasicAutocompletion: true,
     enableSnippets: false,
-    enableLiveAutocompletion: true
+    enableLiveAutocompletion: false
 });
+
+// automatically open popup after dot or word characters
+var doLiveAutocomplete = function(e) {
+  var editor = e.editor;
+  if (e.command.name === "insertstring") {
+    // if Tab is pressed, do not reopen the autocomplete popup
+    var completer_visible = editor.completer && editor.completer.activated;
+    if (completer_visible && !(e.args && e.args.slice(-1)=='.')) {
+      return;
+    }
+    // only autocomplete if there is a prefix that can be matched
+    if (/[\w.]/.test(e.args)) {
+      editor.execCommand("startAutocomplete")
+    }
+  }
+}
+
+editor.commands.on('afterExec', doLiveAutocomplete);
+
 </script>
 
 <script src="bundle.js" type="text/javascript" charset="utf-8"></script>
