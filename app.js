@@ -3,21 +3,34 @@ var Swal = require('sweetalert2');
 var herajs = require('@herajs/client');
 //const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 var chainId = '';
+var showbox = false;
 
-document.getElementById("install-extension").onclick = function() {
+function install_extension_click() {
   var win = window.open('https://chrome.google.com/webstore/detail/aergo-connect/iopigoikekfcpcapjlkcdlokheickhpc', '_blank');
   win.focus();
   hide_box();
 }
 
 function hide_box() {
-  document.getElementById("no-extension").style.display = "none";
+  showbox = false;
+  $('#no-extension').remove();
 }
 
 function aergoConnectCall(action, responseType, data) {
 
+  showbox = true;
   setTimeout(function() {
-    document.getElementById("no-extension").style.display = "block";
+    if (!showbox) return;
+
+    const box = '<div id="no-extension" class="no-extension swal2-container swal2-center">' +
+    '<div class="swal2-content swal2-html-container" style="display: block;"><br>Nothing happened?</div>' +
+    '<button id="install-extension" type="button" class="swal2-confirm swal2-styled" aria-label="" ' +
+    'style="display: inline-block; background-color: rgb(229, 0, 125); border-left-color: rgb(229, 0, 125);' +
+    'border-right-color: rgb(229, 0, 125);">Install Aergo Connect</button></div>';
+
+    $('body').append(box);
+    $("#install-extension").click(install_extension_click);
+
   }, 3000);
 
   return new Promise((resolve, reject) => {
