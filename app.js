@@ -102,10 +102,14 @@ function convertPayload(encoded) {
   return uint8ToBase64(contract.asPayload([]));
 }
 
+function encode_utf8(s) {
+  return unescape(encodeURIComponent(s));
+}
 
 function process_deploy(contract_address){
 
   var content = editor.getValue();
+  content = btoa(encode_utf8(content));
 
   $.ajax({
     type: 'POST',
