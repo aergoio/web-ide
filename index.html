@@ -88,7 +88,6 @@ html, body {
   background-color: #cc1873;
 }
 
-
 .aergo {background-color: #e5007d;} /* Pink */
 .aergo:hover {background-color: #cc0070;}
 
@@ -201,9 +200,9 @@ const modules = {
   bit: ["tobit", "tohex", "bnot", "band", "bor", "bxor", "lshift", "rshift", "arshift", "rol", "ror", "bswap"],
   // aergo modules
   state: ["var", "value", "map", "array"],
-  system: ["getSender", "getBlockheight", "getTxhash", "getTimestamp", "getContractID", "setItem", "getItem", "getAmount", "getCreator", "getOrigin", "getPrevBlockHash", "print", "isContract"],
+  system: ["getSender", "getBlockheight", "getTxhash", "getTimestamp", "getContractID", "setItem", "getItem", "getAmount", "getCreator", "getOrigin", "getPrevBlockHash", "print", "isContract", "isFeeDelegation"],
   contract: ["send", "deploy", "call", "delegatecall", "pcall", "balance", "event", "stake"],
-  db: ["exec", "query", "prepare"],
+  db: ["exec", "query", "prepare", "last_insert_rowid"],
   crypto: ["sha256","ecverify"],
   json: ["encode","decode"],
   bignum: ["number", "isneg", "iszero", "tonumber", "tostring", "neg", "sqrt", "compare", "add", "sub", "mul", "mod", "div", "pow", "divmod", "powmod", "isbignum", "tobyte", "frombyte"],
