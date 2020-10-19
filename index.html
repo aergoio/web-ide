@@ -219,11 +219,13 @@ var myCompleter = {
     var line = session.getLine(pos.row)
     var lineStart = line.slice(0, pos.column - prefix.length)
     var myList = []
+    var score = 0;
 
     if (lineStart.slice(-1) == '.') {
       var name = lastWord(lineStart);
       if (modules[name]) {
         myList = modules[name]
+        score = Number.MAX_VALUE
       }
     } else {
       myList = Object.keys(modules)
@@ -232,7 +234,7 @@ var myCompleter = {
     callback(null, myList.map(entry => {
       return {
         value: entry,
-        score: 1000
+        score: score
       }
     }))
 
