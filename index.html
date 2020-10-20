@@ -279,8 +279,8 @@ const aergo_lua = {
     vote: 'vote(${1:targets...})'
   },
   db: {
-    exec: 'exec("${1:statement}")',
-    query: 'query("${1:statement}")',
+    exec: 'exec("${1:statement}", ${2:values...})',
+    query: 'query("${1:statement}", ${2:values...})',
     prepare: 'prepare("${1:statement}")',
     last_insert_rowid: 'last_insert_rowid()'
   },
