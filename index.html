@@ -354,6 +354,11 @@ Object.keys(aergo_lua).map(function(key) {
   })
 })
 
+snippets.push({
+  name: 'assert',
+  code: 'assert(${1:expression}, "${2:failure message}")'
+})
+
 
 function lastWord(words) {
   var n = words.split(/[\s,=\.]+/);
