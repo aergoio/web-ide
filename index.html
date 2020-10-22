@@ -361,7 +361,7 @@ snippets.push({
 
 
 function lastWord(words) {
-  var n = words.split(/[\s,=\.]+/);
+  var n = words.split(/[\s;\(\[\{,\+\-\*/=<>\?\:\.]+/);
   return n[n.length - 2];
 }
 
