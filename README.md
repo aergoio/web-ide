@@ -20,6 +20,7 @@ Copy these files to the web server:
 
 * index.html
 * bundle.js
+* ace/mode-lua.js
 * logo.png
 * nyan-cat.gif
 
@@ -28,4 +29,3 @@ Copy these files to the web server:
 
 * Wait for transaction receipt and get the returned contract address
 * If the contract has deploy arguments, display a dialog to get them
-* Syntax highlight for aergo keywords
