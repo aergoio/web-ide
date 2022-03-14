@@ -1,8 +1,8 @@
 var $ = require('jquery');
-var Swal = require('sweetalert2');
+var swal = require('sweetalert2');
 var herajs = require('@herajs/client');
-//const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 var chainId = '';
+var aergo = null;
 var showbox = false;
 
 function install_extension_click() {
@@ -61,13 +61,47 @@ async function startTxSendRequest(txdata) {
   const result = await aergoConnectCall('SEND_TX', 'AERGO_SEND_TX_RESULT', txdata);
   console.log('AERGO_SEND_TX_RESULT', result);
 
-  // TODO: wait for the txn receipt
+  swal.fire({
+    title: 'Transaction sent!',
+    text: 'Waiting inclusion on blockchain...',
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    onOpen: () => {
+      swal.showLoading();
+    }
+  })
+
+  if (!aergo) {
+    var url
+    if (chainId == "aergo.io") {
+      url = "mainnet-api-http.aergo.io"
+    } else if (chainId == "testnet.aergo.io") {
+      url = "testnet-api-http.aergo.io"
+    } else if (chainId == "alpha.aergo.io") {
+      url = "alpha-api-http.aergo.io"
+    }
+    url = 'http://' + url + ':7845'
+    aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
+  }
+
+  // wait until the transaction is executed and included in a block, then get the receipt
+  const receipt = await aergo.waitForTransactionReceipt(result.hash);
+  console.log("receipt", receipt);
+
+  if (receipt.status != "SUCCESS") {
+    swal.fire({
+      icon: 'error',
+      title: 'Failed!',
+      text: receipt.result
+    })
+    return false
+  }
 
   var site = chainId.replace('aergo','aergoscan');
   if (site == 'aergoscan.io') site = 'mainnet.aergoscan.io';
   var url = 'https://' + site + '/transaction/' + result.hash;
 
-  Swal.fire({
+  swal.fire({
     icon: 'success',
     title: 'Congratulations!',
     html: '<br>Your smart contract was deployed!<br>&nbsp;',
@@ -133,7 +167,7 @@ function process_deploy(contract_address){
     success: async function(responseData, textStatus, jqXHR) {
         var value = responseData;
         if (value.substring(0,8) != 'result: '){
-          Swal.fire({
+          swal.fire({
             icon: 'error',
             title: 'Compilation failed!',
             text: value
@@ -151,7 +185,7 @@ function process_deploy(contract_address){
         startTxSendRequest(txdata);
     },
     error: function (responseData, textStatus, errorThrown) {
-        Swal.fire({
+        swal.fire({
           icon: 'error',
           title: 'Compilation failed!',
           text: 'Failed to contact the compiler webservice: ' + textStatus
@@ -168,7 +202,7 @@ function deploy(){
 
 function redeploy() {
 
-  Swal.fire({
+  swal.fire({
     title: 'Redeploy',
     html: '<br>Address of existing contract:',
     input: 'text',
