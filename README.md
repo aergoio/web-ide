@@ -27,5 +27,4 @@ Copy these files to the web server:
 
 ## TODO
 
-* Wait for transaction receipt and get the returned contract address
 * If the contract has deploy arguments, display a dialog to get them

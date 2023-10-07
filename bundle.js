@@ -155,11 +155,11 @@ async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
   if (info.chainid.version >= 4) {
     // deploy the source code
     const contract = herajs.Contract.fromSourceCode(sourceCode);
-    const payload = contract_plain.asPayload([]);
+    const payload = contract.asPayload([]);
   } else {
     // deploy the compiled byte code
     const contract = herajs.Contract.fromCode(encodedByteCode);
-    const payload = uint8ToBase64(contract_build.asPayload([]));
+    const payload = uint8ToBase64(contract.asPayload([]));
   }
 
   var txdata = {
