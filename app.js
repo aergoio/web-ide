@@ -71,19 +71,6 @@ async function startTxSendRequest(txdata) {
     }
   })
 
-  if (!aergo) {
-    var url
-    if (chainId == "aergo.io") {
-      url = "mainnet-api-http.aergo.io"
-    } else if (chainId == "testnet.aergo.io") {
-      url = "testnet-api-http.aergo.io"
-    } else if (chainId == "alpha.aergo.io") {
-      url = "alpha-api-http.aergo.io"
-    }
-    url = 'http://' + url + ':7845'
-    aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
-  }
-
   // wait until the transaction is executed and included in a block, then get the receipt
   const receipt = await aergo.waitForTransactionReceipt(result.hash);
   console.log("receipt", receipt);
@@ -136,33 +123,66 @@ function uint8ToBase64(buffer) {
   return window.btoa( binary );
 }
 
-function convertPayload(encoded) {
-  /*
-  var args = [];
-  const text = encodeBuffer(decodeToBytes(encoded, 'base58'), 'ascii');
-  const match = text.match(new RegExp(/({"name":"constructor","arguments":\[.*?\]})/));
-  if (match) {
-    args = JSON.parse(match[1]);
-  }
-  */
-  const contract = herajs.Contract.fromCode(encoded);
-  return uint8ToBase64(contract.asPayload([]));
-}
-
 function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
 
-function process_deploy(contract_address){
+async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
 
-  var content = editor.getValue();
-  content = btoa(encode_utf8(content));
+  // get the account information, including the chain to use
+  const account_address = await getActiveAccount();
+
+  // connect to the chain, if not done yet
+  if (!aergo) {
+    var url
+    if (chainId == "aergo.io") {
+      url = "mainnet-api-http.aergo.io"
+    } else if (chainId == "testnet.aergo.io") {
+      url = "testnet-api-http.aergo.io"
+    } else if (chainId == "alpha.aergo.io") {
+      url = "alpha-api-http.aergo.io"
+    }
+    url = 'http://' + url + ':7845'
+    aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
+  }
+
+  // retrieve the blockchain info from the node
+  const info = await aergo.getChainInfo()
+  console.log('hardfork version:', info.chainid.version);
+
+  // check the current hardfork version
+  if (info.chainid.version >= 4) {
+    // deploy the source code
+    const contract = herajs.Contract.fromSourceCode(sourceCode);
+    const payload = contract_plain.asPayload([]);
+  } else {
+    // deploy the compiled byte code
+    const contract = herajs.Contract.fromCode(encodedByteCode);
+    const payload = uint8ToBase64(contract_build.asPayload([]));
+  }
+
+  var txdata = {
+    type: (contract_address == null) ? 6 : 2,
+    from: account_address,
+    to: contract_address,
+    amount: 0,
+    payload: payload
+  }
+  console.log(txdata)
+
+  startTxSendRequest(txdata);
+}
+
+function check_contract_code(contract_address){
+
+  var sourceCode = editor.getValue();
+  //sourceCode = btoa(encode_utf8(sourceCode));
 
   $.ajax({
     type: 'POST',
     url: 'https://luac.aergo.io/compile',
     crossDomain: true,
-    data: content,
+    data: btoa(encode_utf8(sourceCode)),
     dataType: 'text',
     success: async function(responseData, textStatus, jqXHR) {
         var value = responseData;
@@ -174,15 +194,8 @@ function process_deploy(contract_address){
           })
           return;
         }
-        var account_address = await getActiveAccount();
-        var txdata = {
-          type: (contract_address == null) ? 6 : 2,
-          from: account_address,
-          to: contract_address,
-          amount: 0,
-          payload: convertPayload(value.substring(8).trim())
-        }
-        startTxSendRequest(txdata);
+        const encodedByteCode = value.substring(8).trim();
+        deploy_contract(contract_address, sourceCode, encodedByteCode)
     },
     error: function (responseData, textStatus, errorThrown) {
         swal.fire({
@@ -193,6 +206,10 @@ function process_deploy(contract_address){
     }
   });
 
+}
+
+function process_deploy(contract_address){
+  check_contract_code(contract_address)
 }
 
 function deploy(){

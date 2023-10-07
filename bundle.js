@@ -1,9 +1,9 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 var $ = require('jquery');
-var Swal = require('sweetalert2');
+var swal = require('sweetalert2');
 var herajs = require('@herajs/client');
-//const aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: 'http://localhost:12345'}));
 var chainId = '';
+var aergo = null;
 var showbox = false;
 
 function install_extension_click() {
@@ -62,13 +62,34 @@ async function startTxSendRequest(txdata) {
   const result = await aergoConnectCall('SEND_TX', 'AERGO_SEND_TX_RESULT', txdata);
   console.log('AERGO_SEND_TX_RESULT', result);
 
-  // TODO: wait for the txn receipt
+  swal.fire({
+    title: 'Transaction sent!',
+    text: 'Waiting inclusion on blockchain...',
+    allowEscapeKey: false,
+    allowOutsideClick: false,
+    onOpen: () => {
+      swal.showLoading();
+    }
+  })
+
+  // wait until the transaction is executed and included in a block, then get the receipt
+  const receipt = await aergo.waitForTransactionReceipt(result.hash);
+  console.log("receipt", receipt);
+
+  if (receipt.status != "SUCCESS") {
+    swal.fire({
+      icon: 'error',
+      title: 'Failed!',
+      text: receipt.result
+    })
+    return false
+  }
 
   var site = chainId.replace('aergo','aergoscan');
   if (site == 'aergoscan.io') site = 'mainnet.aergoscan.io';
   var url = 'https://' + site + '/transaction/' + result.hash;
 
-  Swal.fire({
+  swal.fire({
     icon: 'success',
     title: 'Congratulations!',
     html: '<br>Your smart contract was deployed!<br>&nbsp;',
@@ -103,56 +124,82 @@ function uint8ToBase64(buffer) {
   return window.btoa( binary );
 }
 
-function convertPayload(encoded) {
-  /*
-  var args = [];
-  const text = encodeBuffer(decodeToBytes(encoded, 'base58'), 'ascii');
-  const match = text.match(new RegExp(/({"name":"constructor","arguments":\[.*?\]})/));
-  if (match) {
-    args = JSON.parse(match[1]);
-  }
-  */
-  const contract = herajs.Contract.fromCode(encoded);
-  return uint8ToBase64(contract.asPayload([]));
-}
-
 function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
 
-function process_deploy(contract_address){
+async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
 
-  var content = editor.getValue();
-  content = btoa(encode_utf8(content));
+  // get the account information, including the chain to use
+  const account_address = await getActiveAccount();
+
+  // connect to the chain, if not done yet
+  if (!aergo) {
+    var url
+    if (chainId == "aergo.io") {
+      url = "mainnet-api-http.aergo.io"
+    } else if (chainId == "testnet.aergo.io") {
+      url = "testnet-api-http.aergo.io"
+    } else if (chainId == "alpha.aergo.io") {
+      url = "alpha-api-http.aergo.io"
+    }
+    url = 'http://' + url + ':7845'
+    aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
+  }
+
+  // retrieve the blockchain info from the node
+  const info = await aergo.getChainInfo()
+  console.log('hardfork version:', info.chainid.version);
+
+  // check the current hardfork version
+  if (info.chainid.version >= 4) {
+    // deploy the source code
+    const contract = herajs.Contract.fromSourceCode(sourceCode);
+    const payload = contract_plain.asPayload([]);
+  } else {
+    // deploy the compiled byte code
+    const contract = herajs.Contract.fromCode(encodedByteCode);
+    const payload = uint8ToBase64(contract_build.asPayload([]));
+  }
+
+  var txdata = {
+    type: (contract_address == null) ? 6 : 2,
+    from: account_address,
+    to: contract_address,
+    amount: 0,
+    payload: payload
+  }
+  console.log(txdata)
+
+  startTxSendRequest(txdata);
+}
+
+function check_contract_code(contract_address){
+
+  var sourceCode = editor.getValue();
+  //sourceCode = btoa(encode_utf8(sourceCode));
 
   $.ajax({
     type: 'POST',
     url: 'https://luac.aergo.io/compile',
     crossDomain: true,
-    data: content,
+    data: btoa(encode_utf8(sourceCode)),
     dataType: 'text',
     success: async function(responseData, textStatus, jqXHR) {
         var value = responseData;
         if (value.substring(0,8) != 'result: '){
-          Swal.fire({
+          swal.fire({
             icon: 'error',
             title: 'Compilation failed!',
             text: value
           })
           return;
         }
-        var account_address = await getActiveAccount();
-        var txdata = {
-          type: (contract_address == null) ? 6 : 2,
-          from: account_address,
-          to: contract_address,
-          amount: 0,
-          payload: convertPayload(value.substring(8).trim())
-        }
-        startTxSendRequest(txdata);
+        const encodedByteCode = value.substring(8).trim();
+        deploy_contract(contract_address, sourceCode, encodedByteCode)
     },
     error: function (responseData, textStatus, errorThrown) {
-        Swal.fire({
+        swal.fire({
           icon: 'error',
           title: 'Compilation failed!',
           text: 'Failed to contact the compiler webservice: ' + textStatus
@@ -162,6 +209,10 @@ function process_deploy(contract_address){
 
 }
 
+function process_deploy(contract_address){
+  check_contract_code(contract_address)
+}
+
 function deploy(){
   process_deploy(null);
   return false;
@@ -169,7 +220,7 @@ function deploy(){
 
 function redeploy() {
 
-  Swal.fire({
+  swal.fire({
     title: 'Redeploy',
     html: '<br>Address of existing contract:',
     input: 'text',
@@ -44993,12 +45044,14 @@ document.getElementById("settings").onclick = function() {
             magic: chainid.getMagic(),
             "public": chainid.getPublic(),
             mainnet: chainid.getMainnet(),
-            consensus: chainid.getConsensus()
+            consensus: chainid.getConsensus(),
+            version: chainid.getVersion()
           } : {
             magic: 'unknown',
             "public": false,
             mainnet: false,
-            consensus: 'unknown'
+            consensus: 'unknown',
+            version: 0
           },
           bpnumber: grpcObject.getBpnumber(),
           maxblocksize: grpcObject.getMaxblocksize(),
@@ -45888,6 +45941,19 @@ document.getElementById("settings").onclick = function() {
         var decoded = Contract.decodeCode(bs58checkCode);
         return new Contract({
           code: decoded
+        });
+      }
+      /**
+       * Create contract instance and set address
+       * @param {Address} address 
+       * @return {Contract} contract instance 
+       */
+
+    }, {
+      key: "fromSourceCode",
+      value: function fromSourceCode(sourceCode) {
+        return new Contract({
+          code: Buffer.from(sourceCode)
         });
       }
       /**
