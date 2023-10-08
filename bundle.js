@@ -154,13 +154,12 @@ async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
   // check the current hardfork version
   if (info.chainid.version >= 4) {
     // deploy the source code
-    const contract = herajs.Contract.fromSourceCode(sourceCode);
-    var payload = contract.asPayload([]);
+    var contract = herajs.Contract.fromSourceCode(sourceCode);
   } else {
     // deploy the compiled byte code
-    const contract = herajs.Contract.fromCode(encodedByteCode);
-    var payload = uint8ToBase64(contract.asPayload([]));
+    var contract = herajs.Contract.fromCode(encodedByteCode);
   }
+  var payload = uint8ToBase64(contract.asPayload([]));
 
   var txdata = {
     type: (contract_address == null) ? 6 : 2,
