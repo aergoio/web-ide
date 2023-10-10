@@ -142,7 +142,8 @@ async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
     } else if (chainId == "alpha.aergo.io") {
       url = "alpha-api-http.aergo.io"
     }
-    url = 'http://' + url + ':7845'
+    //url = 'http://' + url + ':7845' // this does not work with testnet
+    url = 'https://' + url
     aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
   }
 
