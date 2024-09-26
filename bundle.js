@@ -76,7 +76,7 @@ async function startTxSendRequest(txdata) {
   const receipt = await aergo.waitForTransactionReceipt(result.hash);
   console.log("receipt", receipt);
 
-  if (receipt.status != "SUCCESS") {
+  if (receipt.status != "CREATED") {
     swal.fire({
       icon: 'error',
       title: 'Failed!',
