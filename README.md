@@ -23,8 +23,3 @@ Copy these files to the web server:
 * ace/mode-lua.js
 * logo.png
 * nyan-cat.gif
-
-
-## TODO
-
-* If the contract has deploy arguments, display a dialog to get them
