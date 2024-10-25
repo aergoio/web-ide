@@ -127,28 +127,44 @@ function encode_utf8(s) {
   return unescape(encodeURIComponent(s));
 }
 
+function connect_to_chain() {
+  // connect to the blockchain network
+  var url
+  if (chainId == "aergo.io") {
+    url = "mainnet-api-http.aergo.io"
+  } else if (chainId == "testnet.aergo.io") {
+    url = "testnet-api-http.aergo.io"
+  } else if (chainId == "alpha.aergo.io") {
+    url = "alpha-api-http.aergo.io"
+  }
+  //url = 'http://' + url + ':7845' // this does not work with testnet
+  url = 'https://' + url
+  aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
+}
+
 async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
 
   // get the account information, including the chain to use
   const account_address = await getActiveAccount();
 
   // connect to the chain, if not done yet
+  var just_connected = false;
   if (!aergo) {
-    var url
-    if (chainId == "aergo.io") {
-      url = "mainnet-api-http.aergo.io"
-    } else if (chainId == "testnet.aergo.io") {
-      url = "testnet-api-http.aergo.io"
-    } else if (chainId == "alpha.aergo.io") {
-      url = "alpha-api-http.aergo.io"
-    }
-    //url = 'http://' + url + ':7845' // this does not work with testnet
-    url = 'https://' + url
-    aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
+    connect_to_chain();
+    just_connected = true;
   }
 
   // retrieve the blockchain info from the node
   const info = await aergo.getChainInfo()
+
+  // check if the chain has changed (user selected an account on a different chain)
+  if (!just_connected && info.chainid.magic !== chainId) {
+    // close the existing connection if it exists
+    //await aergo.close();
+    // connect to the new chain
+    connect_to_chain();
+  }
+
   console.log('hardfork version:', info.chainid.version);
 
   // check the current hardfork version
