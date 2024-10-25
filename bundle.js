@@ -114,6 +114,45 @@ async function startTxSendRequest(txdata) {
 
 }
 
+async function get_deploy_args() {
+  var user_input = "[]"
+
+  while (true) {
+
+    const result = await swal.fire({
+      title: 'Deploy Arguments',
+      html: '<br>Enter the parameters to the constructor function:<br>(JSON array)',
+      input: 'text',
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      confirmButtonColor: '#e5007d',
+      showCancelButton: true,
+      inputValue: user_input
+    });
+
+    if (!result.isConfirmed) {
+      throw new Error('User cancelled deployment');
+    }
+
+    try {
+      if (result.value == '') {
+        return [];
+      }
+      user_input = result.value;
+      return JSON.parse(result.value);
+    } catch (e) {
+      await swal.fire({
+        icon: 'error',
+        title: 'Invalid Input',
+        html: 'Please enter a valid JSON array<br>Example: [1, "test", true]'
+      });
+      // loop
+    }
+
+  }
+
+}
 
 function uint8ToBase64(buffer) {
   var binary = '';
@@ -144,6 +183,19 @@ function connect_to_chain() {
 }
 
 async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
+
+  // if the sourceCode contains `constructor`, ask for the constructor parameters
+  var constructor_params = [];
+  if (sourceCode.includes('constructor')) {
+    try {
+      constructor_params = await get_deploy_args();
+    } catch (e) {
+      if (e.message === 'User cancelled deployment') {
+        return;
+      }
+      throw e;
+    }
+  }
 
   // get the account information, including the chain to use
   const account_address = await getActiveAccount();
@@ -176,7 +228,7 @@ async function deploy_contract(contract_address, sourceCode, encodedByteCode) {
     // deploy the compiled byte code
     var contract = herajs.Contract.fromCode(encodedByteCode);
   }
-  var payload = uint8ToBase64(contract.asPayload([]));
+  var payload = uint8ToBase64(contract.asPayload(constructor_params));
 
   var txdata = {
     type: (contract_address == null) ? 6 : 2,
