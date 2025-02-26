@@ -2,6 +2,8 @@ var $ = require('jquery');
 var swal = require('sweetalert2');
 var herajs = require('@herajs/client');
 var chainId = '';
+var nodeUrl = '';
+var scanExplorerUrl = '';
 var aergo = null;
 var showbox = false;
 
@@ -54,6 +56,10 @@ function aergoConnectCall(action, responseType, data) {
 async function getActiveAccount() {
   const result = await aergoConnectCall('ACTIVE_ACCOUNT', 'AERGO_ACTIVE_ACCOUNT', {});
   chainId = result.account.chainId;
+  nodeUrl = result.account.nodeUrl;
+  if (result.account.scanExplorerUrl) {
+    scanExplorerUrl = result.account.scanExplorerUrl;
+  }
   return result.account.address;
 }
 
@@ -84,9 +90,15 @@ async function startTxSendRequest(txdata) {
     return false
   }
 
-  var site = chainId.replace('aergo','aergoscan');
-  if (site == 'aergoscan.io') site = 'mainnet.aergoscan.io';
-  var url = 'https://' + site + '/transaction/' + result.hash;
+  var site;
+  if (scanExplorerUrl) {
+    site = scanExplorerUrl;
+  } else {
+    site = chainId.replace('aergo','aergoscan');
+    if (site == 'aergoscan.io') site = 'mainnet.aergoscan.io';
+    site = 'https://' + site;
+  }
+  var url = site + '/transaction/' + result.hash;
 
   swal.fire({
     icon: 'success',
@@ -169,15 +181,19 @@ function encode_utf8(s) {
 function connect_to_chain() {
   // connect to the blockchain network
   var url
-  if (chainId == "aergo.io") {
-    url = "mainnet-api-http.aergo.io"
-  } else if (chainId == "testnet.aergo.io") {
-    url = "testnet-api-http.aergo.io"
-  } else if (chainId == "alpha.aergo.io") {
-    url = "alpha-api-http.aergo.io"
+  if (nodeUrl) {
+    url = nodeUrl
+  } else {
+    if (chainId == "aergo.io") {
+      url = "mainnet-api-http.aergo.io"
+    } else if (chainId == "testnet.aergo.io") {
+      url = "testnet-api-http.aergo.io"
+    } else if (chainId == "alpha.aergo.io") {
+      url = "alpha-api-http.aergo.io"
+    }
+    //url = 'http://' + url + ':7845' // this does not work with testnet
+    url = 'https://' + url
   }
-  //url = 'http://' + url + ':7845' // this does not work with testnet
-  url = 'https://' + url
   aergo = new herajs.AergoClient({}, new herajs.GrpcWebProvider({url: url}))
 }
 
