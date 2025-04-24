@@ -8,7 +8,7 @@ var aergo = null;
 var showbox = false;
 
 function install_extension_click() {
-  var win = window.open('https://chrome.google.com/webstore/detail/aergo-connect/iopigoikekfcpcapjlkcdlokheickhpc', '_blank');
+  var win = window.open('https://chromewebstore.google.com/detail/aergo-connect-30/mcijhnoalllmbiehiebonblllpimlnle', '_blank');
   win.focus();
   hide_box();
 }
